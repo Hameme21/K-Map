@@ -171,52 +171,6 @@
     box-shadow: 0 0 12px rgba(79,158,255,0.1);
   }
 
-  /* Mode buttons */
-  .mode-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .mode-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    padding: 10px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-align: left;
-  }
-
-  .mode-btn .dot {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .mode-btn:hover { border-color: var(--border2); color: var(--text); }
-
-  .mode-btn[data-mode="1"].active { border-color: var(--accent); color: var(--accent); background: rgba(79,158,255,0.08); }
-  .mode-btn[data-mode="0"].active { border-color: var(--text3); color: var(--text2); background: rgba(90,90,120,0.1); }
-  .mode-btn[data-mode="x"].active { border-color: var(--warn); color: var(--warn); background: rgba(245,158,11,0.08); }
-
-  .mode-btn[data-mode="1"] .dot { background: rgba(79,158,255,0.15); color: var(--accent); }
-  .mode-btn[data-mode="0"] .dot { background: rgba(90,90,120,0.2); color: var(--text3); }
-  .mode-btn[data-mode="x"] .dot { background: rgba(245,158,11,0.15); color: var(--warn); }
-
   /* Action buttons */
   .action-grid {
     display: grid;
@@ -647,24 +601,6 @@
       </div>
 
       <div class="panel">
-        <div class="panel-title">Input Mode</div>
-        <div class="mode-grid">
-          <button class="mode-btn" data-mode="1" onclick="setMode(1)">
-            <span class="dot">1</span>
-            Write ONE (Minterm)
-          </button>
-          <button class="mode-btn active" data-mode="0" onclick="setMode(0)">
-            <span class="dot">0</span>
-            Write ZERO (Maxterm)
-          </button>
-          <button class="mode-btn" data-mode="x" onclick="setMode('x')">
-            <span class="dot">X</span>
-            Don't Care (X)
-          </button>
-        </div>
-      </div>
-
-      <div class="panel">
         <div class="panel-title">Actions</div>
         <div class="action-grid">
           <button class="action-btn danger" onclick="clearAll()">Clear All</button>
@@ -719,7 +655,7 @@
         <div class="kmap-wrapper">
           <div class="kmap-inner" id="kmap-inner"></div>
         </div>
-        <p class="hint">Click cells to set values · Current mode: <span id="mode-hint" style="color:var(--text2)">ZERO</span></p>
+        <p class="hint">Tap a cell to cycle values: 0 → 1 → X</p>
       </div>
 
       <!-- Result -->
@@ -741,7 +677,6 @@
 <script>
   // ─── State ───────────────────────────────────────────────────────
   let nVars = 4;
-  let mode = 0;
   let cells = [];
 
   const VAR_NAMES = ['A','B','C','D'];
@@ -765,19 +700,10 @@
     init();
   }
 
-  // ─── Input mode ───────────────────────────────────────────────────
-  function setMode(m) {
-    mode = m;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode == m));
-    const labels = {0:'ZERO (Maxterm)', 1:'ONE (Minterm)', x:"DON'T CARE (X)"};
-    document.getElementById('mode-hint').textContent = labels[m];
-    const colors = {0:'var(--text3)', 1:'var(--accent)', x:'var(--warn)'};
-    document.getElementById('mode-hint').style.color = colors[m];
-  }
-
-  // ─── Cell toggle ─────────────────────────────────────────────────
+  // ─── Cell cycle ──────────────────────────────────────────────────
   function toggleCell(idx) {
-    cells[idx] = mode;
+    const nextValue = {0: 1, 1: 'x', x: 0};
+    cells[idx] = nextValue[cells[idx]];
     render();
   }
 
@@ -870,7 +796,7 @@
         const isGrouped = groupedMinterms.has(m) && v === 1;
         const cls = `kmap-cell val-${v}${isGrouped ? ' grouped' : ''}`;
         const display = v === 'x' ? 'X' : v;
-        html += `<div class="${cls}" onclick="toggleCell(${m})" title="m${m}">
+        html += `<div class="${cls}" onclick="toggleCell(${m})" title="m${m}: tap to cycle 0 → 1 → X">
           <span class="minterm">${m}</span>${display}</div>`;
       }
       html += `</div></div>`;
@@ -1079,7 +1005,6 @@
   function arrEq(a, b) { return a.length === b.length && a.every((v, i) => v === b[i]); }
 
   // ─── Boot ────────────────────────────────────────────────────────
-  setMode(0);
   init();
 </script>
 </body>
