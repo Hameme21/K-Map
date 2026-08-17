@@ -1,2 +1,2 @@
 # K-Map
-Open in Browser: [Link](https://k-map-six.vercel.app/) 
+Open in Browser: [K Map](https://hameme21.github.io/K-Map/)
